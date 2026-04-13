@@ -1,0 +1,171 @@
++----------------------+
+|        Kapal         |
++----------------------+
+| - idKapal: int       |
+| - namaKapal: string  |
+| - jenisKapal: string |
+| - tahunPembuatan:int |
+| - bobotKapal: double |
+| - statusOperasional  |
+| - createdAt          |
+| - updatedAt          |
++----------------------+
+| +createKapal()       |
+| +updateKapal()       |
+| +deleteKapal()       |
+| +getKapalById()      |
++----------------------+
+
+          1
+          |
+          | *
++----------------------+
+|    AreaInspeksi      |
++----------------------+
+| - idArea: int        |
+| - namaArea: string   |
+| - kodeArea: string   |
+| - titikKoordinat     |
++----------------------+
+| +createArea()        |
+| +updateArea()        |
+| +getAreaByKapal()    |
++----------------------+
+
+          *
+          |
+          | 1
++----------------------+
+|      Inspeksi        |
++----------------------+
+| - idInspeksi: int    |
+| - tanggalInspeksi    |
+| - inspekturNama      |
+| - statusInspeksi     |
++----------------------+
+| +createInspeksi()    |
+| +updateStatus()      |
+| +validateData()      |
+| +startInspeksi()     |
+| +selesaiInspeksi()   |
++----------------------+
+   |        |        |
+   |        |        |
+   |        |        |
+   v        v        v
++-----------+ +-------------+ +------------------+
+|  Kapal    | | AreaInspeksi| |   MetodeNDT     |
++-----------+ +-------------+ +------------------+
+
++----------------------+
+|     MetodeNDT        |
++----------------------+
+| - idMetode: int      |
+| - kodeMetode         |
+| - namaMetode         |
+| - deskripsi          |
++----------------------+
+| +getAllMetode()      |
+| +getMetodeById()     |
++----------------------+
+
+========================================================
+            ABSTRACT CLASS
+========================================================
+
++----------------------------------+
+|     <<abstract>>                 |
+|     DetailPengujian              |
++----------------------------------+
+| - idInspeksi: int                |
+| - statusHasil: string            |
++----------------------------------+
+| +validateInput(): boolean        |
+| +analisis(): void                |
+| +getStatusHasil(): string        |
++----------------------------------+
+              ▲
+   ┌──────────┼───────────┬───────────┐
+   |          |           |           |
+   |          |           |           |
+
++-----------------------+   +------------------------+
+|   PenetrantTest       |   |     VacuumTest         |
++-----------------------+   +------------------------+
+| - jenisPenetrant      |   | - tekananVacuum        |
+| - waktuPenetrasi      |   | - durasiPengujian      |
+| - indikasiCacat       |   | - indikasiBocor        |
+| - lokasiCacat         |   | - lokasiBocor          |
+| - ukuranCacat         |   | - catatanKhusus        |
+| - fotoDokumentasi     |   +------------------------+
++-----------------------+   | +inputParameter()      |
+| +inputData()          |   | +validasiParameter()   |
+| +analisisCacat()      |   | +analisisKebocoran()   |
+| +tentukanStatus()     |   | +tentukanStatus()      |
++-----------------------+   +------------------------+
+
++------------------------------+
+|   UltrasonicTest             |
++------------------------------+
+| - frekuensiUT                |
+| - nilaiKetebalan             |
+| - batasStandar               |
+| - lajuKorosi                 |
+| - jenisCacat                 |
+| - kedalamanCacat             |
+| - grafikUltrasonik           |
++------------------------------+
+| +inputData()                 |
+| +hitungKorosi()              |
+| +analisisKetebalan()         |
+| +tentukanStatus()            |
++------------------------------+
+
++------------------------------+
+|   Metalografi                |
++------------------------------+
+| - gambarMikroskop            |
+| - resolusiGambar             |
+| - strukturMikro              |
+| - butiranRating              |
+| - inklusiNonLogam            |
+| - kesimpulan                 |
++------------------------------+
+| +uploadGambar()              |
+| +validasiGambar()            |
+| +analisisStruktur()          |
+| +tentukanStatus()            |
++------------------------------+
+
+========================================================
+
++--------------------------+
+|   ValidasiInspeksi       |
++--------------------------+
+| - idValidasi             |
+| - statusValidasi         |
+| - tglValidasi            |
+| - catatanValidasi        |
+| - validasiBy             |
++--------------------------+
+| +validate()              |
+| +reject()                |
+| +isValidated(): boolean  |
++--------------------------+
+
+           1
+           |
+           | 1
++--------------------------+
+|   LaporanInspeksi        |
++--------------------------+
+| - idLaporan              |
+| - fileLaporan            |
+| - tglGenerate            |
+| - versiLaporan           |
+| - statusTerkirim         |
++--------------------------+
+| +generateLaporan()       |
+| +exportPDF()             |
+| +kirimLaporan()          |
++--------------------------+
