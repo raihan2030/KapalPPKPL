@@ -26,13 +26,91 @@
                         </div>
                         <div class="col-md-6 mt-2">
                             <p class="mb-1"><small class="text-muted">Metode Perhitungan</small></p>
-                            <p class="mb-0"><strong>{{ $inspeksi->metode_perhitungan == 'rule_90' ? 'Rule 90% (0.9 x t_origin)' : 'Rule 85% (0.85 x t_origin)' }}</strong></p>
+                            <p class="mb-0">
+                                <strong>{{ $inspeksi->metode_perhitungan == 'rule_90' ? 'Rule 90% (0.9 x t_origin)' : 'Rule 85% (0.85 x t_origin)' }}</strong>
+                            </p>
                         </div>
                     </div>
 
-                    @if(session('success'))
-                        <div class="alert alert-success">{{ session('success') }}</div>
+                    @if (session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
                     @endif
+
+                    @if (session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ session('error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+                    @if (session('warning'))
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            {{ session('warning') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+                    @if (session('info'))
+                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                            {{ session('info') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+                    <!-- Status Validasi (US4) -->
+                    <div
+                        class="card mb-3 border-0 
+                        @if ($inspeksi->status_validasi === 'validated' && $inspeksi->is_locked) bg-success bg-opacity-10
+                        @elseif($inspeksi->status_validasi === 'rejected')
+                            bg-danger bg-opacity-10
+                        @else
+                            bg-warning bg-opacity-10 @endif
+                    ">
+                        <div class="card-body py-2">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <p class="mb-1"><small class="text-muted">Status Validasi</small></p>
+                                    <p class="mb-0">
+                                        @if ($inspeksi->status_validasi === 'validated' && $inspeksi->is_locked)
+                                            <span class="badge bg-success fs-6">✅ TERVALIDASI</span>
+                                            <small class="text-muted ms-2">
+                                                ({{ $inspeksi->validated_at?->format('d/m/Y H:i') }})
+                                            </small>
+                                        @elseif($inspeksi->status_validasi === 'rejected')
+                                            <span class="badge bg-danger fs-6">❌ DITOLAK</span>
+                                            <small class="text-muted ms-2">
+                                                ({{ $inspeksi->validated_at?->format('d/m/Y H:i') }})
+                                            </small>
+                                        @else
+                                            <span class="badge bg-warning text-dark fs-6">⏳ BELUM DIVALIDASI</span>
+                                        @endif
+                                    </p>
+                                </div>
+                                <div class="col-md-4">
+                                    @if ($inspeksi->status_validasi !== 'validated' || !$inspeksi->is_locked)
+                                        <a href="{{ route('ultrasonic.validation.show', $inspeksi->id_inspeksi) }}"
+                                            class="btn btn-sm btn-primary w-100">
+                                            Validasi Sekarang
+                                        </a>
+                                    @else
+                                        <span class="badge bg-success p-2">
+                                            🔒 Data Terkunci
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            @if ($inspeksi->catatan_validasi)
+                                <hr class="my-2">
+                                <small class="text-muted">
+                                    <strong>Catatan:</strong> {{ $inspeksi->catatan_validasi }}
+                                </small>
+                            @endif
+                        </div>
+                    </div>
 
                     <!-- Hasil Analisis Ketebalan -->
                     <div class="card mb-3 border-0 shadow-none">
@@ -42,7 +120,8 @@
                         <div class="card-body">
                             <table class="table table-borderless mb-0">
                                 <tr>
-                                    <td width="45%"><small class="text-muted">Ketebalan Desain Awal (t_origin)</small></td>
+                                    <td width="45%"><small class="text-muted">Ketebalan Desain Awal (t_origin)</small>
+                                    </td>
                                     <td width="10%">:</td>
                                     <td><strong>{{ $inspeksi->t_origin }} mm</strong></td>
                                 </tr>
@@ -60,8 +139,11 @@
                                     <td><small class="text-muted">Pengurangan / Penipisan</small></td>
                                     <td>:</td>
                                     <td>
-                                        <strong class="text-danger">{{ number_format($inspeksi->t_origin - $inspeksi->nilai_ketebalan, 2) }} mm</strong>
-                                        <span class="badge {{ $inspeksi->persentase_penipisan > 25 ? 'bg-danger' : ($inspeksi->persentase_penipisan > 10 ? 'bg-warning' : 'bg-success') }} ms-2">
+                                        <strong
+                                            class="text-danger">{{ number_format($inspeksi->t_origin - $inspeksi->nilai_ketebalan, 2) }}
+                                            mm</strong>
+                                        <span
+                                            class="badge {{ $inspeksi->persentase_penipisan > 25 ? 'bg-danger' : ($inspeksi->persentase_penipisan > 10 ? 'bg-warning' : 'bg-success') }} ms-2">
                                             {{ $inspeksi->persentase_penipisan }}%
                                         </span>
                                     </td>
@@ -70,17 +152,18 @@
                                     <td><small class="text-muted">Status Ketebalan</small></td>
                                     <td>:</td>
                                     <td>
-                                        <span class="badge {{ $inspeksi->status_ketebalan == 'OK' ? 'bg-success' : ($inspeksi->status_ketebalan == 'REPAIR' ? 'bg-warning' : 'bg-danger') }} fs-6">
+                                        <span
+                                            class="badge {{ $inspeksi->status_ketebalan == 'OK' ? 'bg-success' : ($inspeksi->status_ketebalan == 'REPAIR' ? 'bg-warning' : 'bg-danger') }} fs-6">
                                             {{ $inspeksi->status_ketebalan }}
                                         </span>
                                     </td>
                                 </tr>
                             </table>
-                            
+
                             <div class="alert alert-info mt-3 mb-0 py-2">
                                 <small>
-                                    📌 
-                                    @if($inspeksi->status_ketebalan == 'OK')
+                                    📌
+                                    @if ($inspeksi->status_ketebalan == 'OK')
                                         Plat dalam kondisi baik, aman untuk operasional.
                                     @elseif($inspeksi->status_ketebalan == 'REPAIR')
                                         Plat mengalami penipisan signifikan, perlu perbaikan.
@@ -93,58 +176,60 @@
                     </div>
 
                     <!-- Hasil Analisis Cacat (jika ada) -->
-                    @if($inspeksi->jenis_cacat && $inspeksi->jenis_cacat != '')
-                    <div class="card mb-3 border-0 shadow-none">
-                        <div class="card-header bg-warning text-dark py-2">
-                            <h6 class="mb-0">🔍 Analisis Cacat</h6>
-                        </div>
-                        <div class="card-body">
-                            <table class="table table-borderless mb-0">
-                                <tr>
-                                    <td width="45%"><small class="text-muted">Jenis Cacat</small></td>
-                                    <td width="10%">:</td>
-                                    <td><strong>{{ $inspeksi->jenis_cacat }}</strong></td>
-                                </tr>
-                                <tr>
-                                    <td><small class="text-muted">Klasifikasi</small></td>
-                                    <td>:</td>
-                                    <td><strong>{{ $inspeksi->klasifikasi_cacat ?? 'Belum diklasifikasi' }}</strong></td>
-                                </tr>
-                                <tr>
-                                    <td><small class="text-muted">Kedalaman Cacat</small></td>
-                                    <td>:</td>
-                                    <td><strong>{{ $inspeksi->kedalaman_cacat }} mm</strong></td>
-                                </tr>
-                                <tr>
-                                    <td><small class="text-muted">Panjang Cacat</small></td>
-                                    <td>:</td>
-                                    <td><strong>{{ $inspeksi->panjang_cacat }} mm</strong></td>
-                                </tr>
-                                <tr>
-                                    <td><small class="text-muted">Status Akseptansi</small></td>
-                                    <td>:</td>
-                                    <td>
-                                        <span class="badge {{ $inspeksi->status_akseptansi == 'ACCEPTED' ? 'bg-success' : 'bg-danger' }} fs-6">
-                                            {{ $inspeksi->status_akseptansi ?? 'Belum ditentukan' }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            </table>
-                            
-                            <div class="alert alert-secondary mt-3 mb-0 py-2">
-                                <small>
-                                    🎯 Rekomendasi: 
-                                    @if($inspeksi->status_akseptansi == 'ACCEPTED')
-                                        Cacat masih dalam batas toleransi, aman digunakan.
-                                    @elseif($inspeksi->status_akseptansi == 'REJECTED')
-                                        Cacat melebihi batas toleransi, WAJIB DIPERBAIKI sebelum operasional!
-                                    @else
-                                        Tidak ada cacat signifikan yang terdeteksi.
-                                    @endif
-                                </small>
+                    @if ($inspeksi->jenis_cacat && $inspeksi->jenis_cacat != '')
+                        <div class="card mb-3 border-0 shadow-none">
+                            <div class="card-header bg-warning text-dark py-2">
+                                <h6 class="mb-0">🔍 Analisis Cacat</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-borderless mb-0">
+                                    <tr>
+                                        <td width="45%"><small class="text-muted">Jenis Cacat</small></td>
+                                        <td width="10%">:</td>
+                                        <td><strong>{{ $inspeksi->jenis_cacat }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><small class="text-muted">Klasifikasi</small></td>
+                                        <td>:</td>
+                                        <td><strong>{{ $inspeksi->klasifikasi_cacat ?? 'Belum diklasifikasi' }}</strong>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><small class="text-muted">Kedalaman Cacat</small></td>
+                                        <td>:</td>
+                                        <td><strong>{{ $inspeksi->kedalaman_cacat }} mm</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><small class="text-muted">Panjang Cacat</small></td>
+                                        <td>:</td>
+                                        <td><strong>{{ $inspeksi->panjang_cacat }} mm</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><small class="text-muted">Status Akseptansi</small></td>
+                                        <td>:</td>
+                                        <td>
+                                            <span
+                                                class="badge {{ $inspeksi->status_akseptansi == 'ACCEPTED' ? 'bg-success' : 'bg-danger' }} fs-6">
+                                                {{ $inspeksi->status_akseptansi ?? 'Belum ditentukan' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <div class="alert alert-secondary mt-3 mb-0 py-2">
+                                    <small>
+                                        🎯 Rekomendasi:
+                                        @if ($inspeksi->status_akseptansi == 'ACCEPTED')
+                                            Cacat masih dalam batas toleransi, aman digunakan.
+                                        @elseif($inspeksi->status_akseptansi == 'REJECTED')
+                                            Cacat melebihi batas toleransi, WAJIB DIPERBAIKI sebelum operasional!
+                                        @else
+                                            Tidak ada cacat signifikan yang terdeteksi.
+                                        @endif
+                                    </small>
+                                </div>
                             </div>
                         </div>
-                    </div>
                     @endif
 
                     <!-- FINAL VERDICT -->
@@ -157,18 +242,22 @@
                                 $finalStatus = 'PASS';
                                 $finalColor = 'success';
                                 $finalMessage = 'Inspeksi LULUS. Kapal aman untuk beroperasi.';
-                                
-                                if($inspeksi->status_ketebalan == 'REPAIR') {
+
+                                if ($inspeksi->status_ketebalan == 'REPAIR') {
                                     $finalStatus = 'CONDITIONAL';
                                     $finalColor = 'warning';
                                     $finalMessage = 'Inspeksi DITERIMA DENGAN CATATAN. Perlu perbaikan terjadwal.';
-                                } elseif($inspeksi->status_ketebalan == 'RENEW' || $inspeksi->status_akseptansi == 'REJECTED') {
+                                } elseif (
+                                    $inspeksi->status_ketebalan == 'RENEW' ||
+                                    $inspeksi->status_akseptansi == 'REJECTED'
+                                ) {
                                     $finalStatus = 'FAIL';
                                     $finalColor = 'danger';
-                                    $finalMessage = 'Inspeksi TIDAK LULUS. Kapal tidak aman, perbaikan wajib dilakukan.';
+                                    $finalMessage =
+                                        'Inspeksi TIDAK LULUS. Kapal tidak aman, perbaikan wajib dilakukan.';
                                 }
                             @endphp
-                            
+
                             <span class="display-6 fw-bold text-{{ $finalColor }}">
                                 {{ $finalStatus }}
                             </span>
@@ -178,9 +267,16 @@
 
                     <!-- Tombol Aksi -->
                     <div class="d-flex gap-2 mt-3">
-                        <a href="{{ route('ultrasonic.create', $inspeksi->id_inspeksi) }}" class="btn btn-warning">
-                            ✏️ Edit Data
-                        </a>
+                        @if ($inspeksi->is_locked)
+                            <button class="btn btn-warning" disabled title="Data terkunci, tidak dapat diedit">
+                                ✏️ Edit Data (Terkunci)
+                            </button>
+                        @else
+                            <a href="{{ route('ultrasonic.edit', $inspeksi->id_inspeksi) }}" class="btn btn-warning">
+                                ✏️ Edit Data
+                            </a>
+                        @endif
+
                         <a href="{{ route('home') }}" class="btn btn-secondary">
                             🏠 Kembali ke Home
                         </a>
