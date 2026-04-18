@@ -265,6 +265,34 @@
                         </div>
                     </div>
 
+                    <!-- Tombol Generate Laporan PDF (Tugas 3.5) -->
+                    @if ($inspeksi->status_validasi === 'validated' && $inspeksi->is_locked)
+                        <div class="card mb-3 border-0 bg-info bg-opacity-10">
+                            <div class="card-body py-2">
+                                <p class="mb-2"><small class="text-muted">📄 Laporan PDF:</small></p>
+                                <div id="reportStatus" style="display: none;">
+                                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <span id="reportMessage">Sedang membuat laporan PDF...</span>
+                                </div>
+                                <div id="reportSuccess" style="display: none;">
+                                    <div class="alert alert-success py-1 px-2 mb-0">
+                                        <small>✅ Laporan berhasil di-generate! <a href="#" id="downloadLink" class="alert-link">Download PDF</a></small>
+                                    </div>
+                                </div>
+                                <div id="reportError" style="display: none;">
+                                    <div class="alert alert-danger py-1 px-2 mb-0">
+                                        <small id="errorMessage">❌ Terjadi kesalahan saat membuat laporan</small>
+                                    </div>
+                                </div>
+                                <button type="button" id="generateBtn" class="btn btn-sm btn-primary mt-2">
+                                    📋 Generate Laporan PDF
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Tombol Aksi -->
                     <div class="d-flex gap-2 mt-3">
                         @if ($inspeksi->is_locked)
@@ -284,6 +312,68 @@
                             🔬 Inspeksi Baru
                         </a>
                     </div>
+
+                    <!-- Script untuk Generate Laporan PDF -->
+                    @if ($inspeksi->status_validasi === 'validated' && $inspeksi->is_locked)
+                        <script>
+                            document.getElementById('generateBtn').addEventListener('click', async function() {
+                                const btn = this;
+                                const statusDiv = document.getElementById('reportStatus');
+                                const successDiv = document.getElementById('reportSuccess');
+                                const errorDiv = document.getElementById('reportError');
+
+                                // Reset display
+                                successDiv.style.display = 'none';
+                                errorDiv.style.display = 'none';
+                                statusDiv.style.display = 'block';
+
+                                // Disable button
+                                btn.disabled = true;
+
+                                try {
+                                    const response = await fetch('/reports/{{ $inspeksi->id_inspeksi }}/generate', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                            'Accept': 'application/json'
+                                        }
+                                    });
+
+                                    // Coba parse response as JSON
+                                    let data;
+                                    try {
+                                        data = await response.json();
+                                    } catch (e) {
+                                        console.error('Response is not JSON:', e);
+                                        throw new Error('Server returned invalid response (not JSON)');
+                                    }
+
+                                    if (response.ok && data.success) {
+                                        // SUCCESS
+                                        statusDiv.style.display = 'none';
+                                        successDiv.style.display = 'block';
+                                        document.getElementById('downloadLink').href = `/reports/${data.report_id}/download`;
+                                        btn.style.display = 'none';
+                                    } else {
+                                        // ERROR
+                                        statusDiv.style.display = 'none';
+                                        errorDiv.style.display = 'block';
+                                        document.getElementById('errorMessage').textContent = 
+                                            '❌ ' + (data.message || 'Terjadi kesalahan saat membuat laporan');
+                                        btn.disabled = false;
+                                    }
+                                } catch (error) {
+                                    console.error('Error:', error);
+                                    statusDiv.style.display = 'none';
+                                    errorDiv.style.display = 'block';
+                                    document.getElementById('errorMessage').textContent = 
+                                        '❌ Error: ' + error.message;
+                                    btn.disabled = false;
+                                }
+                            });
+                        </script>
+                    @endif
                 </div>
             </div>
         </div>

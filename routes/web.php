@@ -4,6 +4,7 @@ use App\Http\Controllers\TestSelectionController;
 use App\Http\Controllers\UltrasonicTestController;
 use App\Http\Controllers\UltrasonicAnalysisController;
 use App\Http\Controllers\ValidationController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 // Home page - Test Selection
@@ -46,3 +47,13 @@ Route::post('/ultrasonic-analysis/reject/{idInspeksi}', [ValidationController::c
     ->name('ultrasonic.validation.reject');
 Route::get('/ultrasonic-analysis/report/{idInspeksi}', [ValidationController::class, 'generateReport'])
     ->name('ultrasonic.validation.report');
+
+// Report Routes (US5 - Generate Laporan UT) - Tugas 3.5
+Route::post('/reports/{idInspeksi}/generate', [ReportController::class, 'generate'])
+    ->name('reports.generate');
+Route::get('/reports/{idLaporan}/download', [ReportController::class, 'download'])
+    ->name('reports.download');
+Route::get('/reports/{idLaporan}/preview', [ReportController::class, 'preview'])
+    ->name('reports.preview');
+Route::get('/reports/inspeksi/{idInspeksi}', [ReportController::class, 'listByInspection'])
+    ->name('reports.list');
