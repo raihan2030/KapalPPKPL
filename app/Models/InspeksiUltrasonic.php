@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class InspeksiUltrasonic extends Model
 {
     protected $table = 'inspeksi_ultrasonic';
-    
+
     protected $fillable = [
         'id_inspeksi',
         'jenis_kapal',
@@ -17,6 +17,7 @@ class InspeksiUltrasonic extends Model
         'batas_standar',
         'metode_perhitungan',
         'frekuensi_ut',
+        'level_pengujian',
         'kelas_area',
         'jenis_cacat',
         'kedalaman_cacat',
@@ -25,6 +26,16 @@ class InspeksiUltrasonic extends Model
         'persentase_penipisan',
         'status_ketebalan',
         'klasifikasi_cacat',
-        'status_akseptansi'
+        'status_akseptansi',
+        'status_validasi',
+        'validated_at',
+        'validated_by',
+        'is_locked',
+        'catatan_validasi'
+    ];
+
+    protected $casts = [
+        'validated_at' => 'datetime',
+        'is_locked' => 'boolean',
     ];
 }
